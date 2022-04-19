@@ -1,10 +1,14 @@
-FROM adoptopenjdk/openjdk8 as builder
+##########################  ENV  ##########################
+FROM adoptopenjdk/openjdk8 as env
 
 ENV USR_PROGRAM_DIR=/usr/program
 ENV DATAX_HOME="${USR_PROGRAM_DIR}/datax"
 ENV DATAX_WEB_HOME="${USR_PROGRAM_DIR}/datax-web"
 ENV DATAX_PACKAGE=datax.tar.gz
 ENV DATAX_WEB_POACKEAGE=datax-web-2.1.2.tar.gz
+
+##########################  BUILDER  ##########################
+FROM env as builder
 WORKDIR /usr/program/
 
 COPY tar-source-files/* "/source_dir/"
@@ -14,15 +18,14 @@ RUN tar -xf "/source_dir/${DATAX_WEB_POACKEAGE}" -C "${USR_PROGRAM_DIR}"  \
  && "${DATAX_WEB_HOME}/bin/install.sh" --force
 RUN rm -rf  /source_dir
 
+##########################  APP  ##########################
+FROM env as app
 
-##########################  多阶段构建  ##########################
-FROM adoptopenjdk/openjdk8 as app
-
-ENV USR_PROGRAM_DIR=/usr/program
-ENV DATAX_HOME="${USR_PROGRAM_DIR}/datax"
-ENV DATAX_WEB_HOME="${USR_PROGRAM_DIR}/datax-web"
-ENV DATAX_PACKAGE=datax.tar.gz
-ENV DATAX_WEB_POACKEAGE=datax-web-2.1.2.tar.gz
+# ENV USR_PROGRAM_DIR=/usr/program
+# ENV DATAX_HOME="${USR_PROGRAM_DIR}/datax"
+# ENV DATAX_WEB_HOME="${USR_PROGRAM_DIR}/datax-web"
+# ENV DATAX_PACKAGE=datax.tar.gz
+# ENV DATAX_WEB_POACKEAGE=datax-web-2.1.2.tar.gz
 WORKDIR /usr/program/
 
 RUN mkdir -p "${USR_PROGRAM_DIR}/source_dir"
