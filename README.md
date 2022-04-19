@@ -7,42 +7,49 @@
 ## 编译datax
 
 ```text
-    自行下载datax代码 编译
-    编译前pom 文件中的 <modules> 注释不需要的数据源
-    替换datax项目中的  /core/src/main/bin/ 替换3个文件 文件在项目python3文件夹下
-    编译命令
-    mvn clean package assembly:assembly -Dmaven.test.skip=true
-    等待编译完成 生成/target/datax.tar.gz
-    将文件拷贝至此项目下/datax.tar.gz
+替换datax项目中的  /core/src/main/bin/ 替换3个文件 文件在项目python3文件夹下
 ```
 
-## 编译datax-web
 
-```text
-    自行下载datax-web代码 编译
-    替换datax-admin/pom.xml 替换文件在项目各自对应的文件夹中
-    替换datax-admin/src/main/resources/application.yml 替换文件在项目各自对应的文件夹中
-    替换datax-admin/src/main/resources/bootstrap.properties 替换文件在项目各自对应的文件夹中
-    替换datax-executor/src/main/resources/application.yml 替换文件在项目各自对应的文件夹中
-    新增datax-executor/src/main/resources/bootstrap.properties 文件，新增文件内容在项目各自对应的文件夹中
-    替换datax-executor/pom.xml 替换文件在项目各自对应的文件夹中
-    编译命令
-    mvn clean package install -Dmaven.test.skip=true
-    编译成功后会datax-executor datax-admin 文件夹下会生成target各自运行的jar
-    将jar文件拷贝到本项目
-```
 
 ## 生成dockerfile
 
-```text
-    dockerfile在项目根目录下
-```
+## 
 
-## docker内部网络访问
+构建服务
 
-```text
-    创建虚拟网络命令如下：
-    network create --subnet=172.10.0.0/24 datax-network
+```shell
+# 构建mysql docker 容器
+mkdir -p /root/mysql/conf
+touch /root/mysql/conf/my.cn
+
+docker run --name mysql5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d  -v /usr/local/docker_data/mysql/data:/var/lib/mysql -v /usr/local/docker_data/mysql/conf:/etc/mysql/ -v /usr/local/docker_data/mysql/logs:/var/log/mysql mysql:5.7
+
+# 单独测试datax
+rm -rf $DATAX_HOME/plugin/*/._*
+python $DATAX_HOME/bin/datax.py $DATAX_HOME/job/job.json
+
+# 构建datax-web容器
+docker run -it -d -p 9527:9527 --name datax-web lisacumt/datax-web-docker:1.1.0
+# 查看容器内服务
+docker exec -it datax-web /bin/bash
+docker exec -it datax-web jps
+# 199 DataXAdminApplication
+# 493 DataXExecutorApplication
+
+# 注意：如果使用docker-compose内的mysql则不需要设置子网，因为compose内已是同一子网；如果连接其他服务器则直接修改bootstrap.properties的地址即可，同样不需要如下子网设置
+
+# datax-web在首次启动的20min内会不断尝试连接mysql容器，并初始化数据库。
+# 超时没有完成初始化请手动在数据库执行$DATAX_WEB_HOME/bin/db/datax_web.sql。
+# 初始化子网
+docker network create --subnet 192.168.100.0/16 --gateway 192.168.0.1 mybridge
+# 将mysql添加到子网
+docker network connect mybridge mysql
+# 将datax-web添加到子网
+docker network connect mybridge datax-web
+# 测试是否能够双向ping通
+docker exec -it mysql ping datax-web
+docker exec -it datax-web ping mysql
 ```
 
 ## datax-admin启动命令
