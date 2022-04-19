@@ -4,19 +4,13 @@
 源项目地址：<https://github.com/WeiYe-Jing/datax-web>
 希望大家多多支持原作者
 
-## 编译datax
+### 特性
 
-```text
-替换datax项目中的  /core/src/main/bin/ 替换3个文件 文件在项目python3文件夹下
-```
+1、全自动启动（自动给连接初始化mysql数据库）
 
+2、datax支持python3
 
-
-## 生成dockerfile
-
-## 
-
-构建服务
+### 构建服务
 
 ```shell
 # 构建mysql docker 容器
@@ -52,86 +46,8 @@ docker exec -it mysql ping datax-web
 docker exec -it datax-web ping mysql
 ```
 
-## datax-admin启动命令
+浏览器访问datax-admin 运行时配置的映射端口
+http://地址:9527/index.html   注意：index.html  必须有
 
-```text
-    运行生成的images  使用/bin/bash 切勿使用/bin/sh
-```
+账号: admin 密码: 123456
 
-### 参数解释
-
-```text
-    PORT 代表admin端口 启动时需要和映射端口保持一致
-    MYSQL_SERVICE_HOST 代表数据库host，可直接填写地址
-    MYSQL_SERVICE_PORT 代表访问端口，基本都是3306 填写
-    MYSQL_USER 代表数据库 用户名
-    MYSQL_PASSWORD 代表数据库 密码
-    DB_DATABASE  初始化数据库 名称
-```
-
-### docker运行命令参考
-
-```text
-    docker run -i -d -p 2020:2020 \
-    --name datax-admin \
-    --net datax-network \
-    --ip 172.10.0.2 zanderchao/datax-admin:v2  \
-    java -jar datax-admin-2.1.2.jar \
-    --PORT=$(PORT) \
-    --MYSQL_SERVICE_HOST=$(MYSQL_SERVICE_HOST) \
-    --MYSQL_SERVICE_PORT=$(MYSQL_SERVICE_PORT) \
-    --MYSQL_USER=$(MYSQL_USER) \
-    --MYSQL_PASSWORD=$(MYSQL_PASSWORD) \
-    --DB_DATABASE=$(DB_DATABASE)
-```
-
-## datax-admin 日志路径
-
-```text
-    /tmp/datax-admin.log
-```
-
-## datax-executor启动命令
-
-参数解释
-
-```text
-    PORT 代表executor端口
-    ADDRESSES 代表admin服务器地址 eg：http://172.10.0.2:2020
-```
-
-docker运行命令参考
-
-```text
-    docker run -i -d -p 2020:2020 \
-    --name datax-admin \
-    --net datax-network \
-    --ip 172.10.0.2  zanderchao/datax-executor:v2  \
-    java -jar datax-executor-2.1.2.jar \
-    --PORT=$(PORT) \
-    --ADDRESSES=$(ADDRESSES)
-```
-
-## datax-executor 日志路径
-
-```text
-    /home/applogs/executor/jobhandler
-```
-
-## 集群部署暂未测试
-
-```text
-    admin只需要启动一次就可以
-    多个executor启动，可将命令中的指定--ip 及 --name 更换为不同即可
-```
-
-## 访问
-
-```text
-    浏览器访问datax-admin 运行时配置的映射端口
-    http://127.0.0.1:port/index.html 初始化密码123456
-```
-
-## FAQ
-
-数据库初始化，可在<https://github.com/WeiYe-Jing/datax-web项目中https://github.com/WeiYe-Jing/datax-web/tree/master/bin/db> 中找到sql文件，手动进行初始化
