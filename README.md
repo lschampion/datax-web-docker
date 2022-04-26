@@ -23,27 +23,37 @@ docker run --name mysql5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d  -v /us
 rm -rf $DATAX_HOME/plugin/*/._*
 python $DATAX_HOME/bin/datax.py $DATAX_HOME/job/job.json
 
-# 构建datax-web容器
-docker run -it -d -p 9527:9527 --name datax-web lisacumt/datax-web-docker:1.1.0
+# 构建datax-web容器,动态传入数据库参数
+# 注意--env 必须在image前，否则不生效
+docker run -it -d -p 9527:9527 --name datax-web \
+--env HOST=192.168.100.110 --env PORT=3306 \
+--env USERNAME=root --env PASSWORD=123456 --env DATABASE=sys \
+lisacumt/datax-web-docker:1.5.0
+
+
 # 查看容器内服务
 docker exec -it datax-web /bin/bash
 docker exec -it datax-web jps
 # 199 DataXAdminApplication
 # 493 DataXExecutorApplication
 
-# 注意：如果使用docker-compose内的mysql则不需要设置子网，因为compose内已是同一子网；如果连接其他服务器则直接修改bootstrap.properties的地址即可，同样不需要如下子网设置
+# 注意：如果使用docker-compose内的mysql则不需要设置子网，因为compose内已是同一子网；
+# 如果连接其他服务器则直接修改bootstrap.properties的地址即可，同样不需要如下子网设置
 
 # datax-web在首次启动的20min内会不断尝试连接mysql容器，并初始化数据库。
 # 超时没有完成初始化请手动在数据库执行$DATAX_WEB_HOME/bin/db/datax_web.sql。
 # 初始化子网
 docker network create --subnet 192.168.100.0/16 --gateway 192.168.0.1 mybridge
 # 将mysql添加到子网
-docker network connect mybridge mysql
+docker network connect mybridge mysql5.7
 # 将datax-web添加到子网
 docker network connect mybridge datax-web
 # 测试是否能够双向ping通
-docker exec -it mysql ping datax-web
-docker exec -it datax-web ping mysql
+docker exec -it datax-web ping mysql5.7
+# docker exec -it mysql5.7 ping datax-web
+
+# 如果容器启动后需要修改元数据数据库信息可以直接修改
+/usr/program/datax-web/modules/datax-admin/conf/bootstrap.properties
 ```
 
 浏览器访问datax-admin 运行时配置的映射端口
@@ -51,3 +61,4 @@ http://地址:9527/index.html   注意：index.html  必须有
 
 账号: admin 密码: 123456
 
+如果登陆提示用户名密码不正确，说明数据库没有初始化成功。

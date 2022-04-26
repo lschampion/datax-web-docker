@@ -71,6 +71,7 @@ RUN apt-get install -y inetutils-ping
 RUN pip3 install --upgrade pip \
  && pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip \
  && pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple pymysql \
+ && pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple argparse \
 # && pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple pymssql \
 # && pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple psycopg2 \
  && rm -rf /usr/bin/python \

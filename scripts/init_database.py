@@ -3,7 +3,24 @@
 import os
 import pymysql
 import time
+import argparse
+parser = argparse.ArgumentParser(description='Jenkins pipline parameters')
+ 
+parser.add_argument('--host', type=str, default='', help='host')
+parser.add_argument('--port', type=str, default='3306', help='port')
+parser.add_argument('--username', type=str, default='', help='username')
+parser.add_argument('--password', type=str, default='', help='password')
+parser.add_argument('--database', type=str, default='', help='database')
 
+args = parser.parse_args()
+ 
+host = args.host
+port = int(args.port)
+username = args.username
+password = args.password
+database = args.database
+
+database
 def sync_mysql_data(conn, file):
     cursor = conn.cursor()
     cursor.execute("show databases;")
@@ -41,7 +58,7 @@ conn = None
 counter = 12 * 20
 while conn is None:
     try:
-        conn = pymysql.connect(host='192.168.100.110', user='root', password='123456', database='sys')
+        conn = pymysql.connect(host=host,port=port, user=username, password=password, database=database)
     except Exception as e:
         print('Get conn failed,try again.\n' + str(e))
         time.sleep(5)
